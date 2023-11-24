@@ -20,6 +20,7 @@
     "vite-plugin-elm": "^2.8.0"
   },
   "dependencies": {
+    "@vercel/postgres": "^0.5.1",
     "elm-debug-transformer": "^1.2.1"
   }
 }
