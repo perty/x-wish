@@ -1,31 +1,99 @@
-module Main exposing (main)
+module Main exposing (Model, Msg(..), Wish, initialModel, main, removeAt, update, view)
 
 import Browser
-import HelloWorld exposing (helloWorld)
-import Html exposing (Html, div, img)
-import Html.Attributes exposing (src, style)
-import Msg exposing (Msg(..))
-import VitePluginHelper
+import Html exposing (Html, button, div, input, text)
+import Html.Attributes exposing (placeholder)
+import Html.Events exposing (onClick, onInput)
 
 
-main : Program () Int Msg
-main =
-    Browser.sandbox { init = 0, update = update, view = view }
+type alias Wish =
+    { content : String
+    , fulfilledBy : Maybe String
+    }
 
 
-update : Msg -> number -> number
+type alias Model =
+    { wishes : List Wish
+    , newWishContent : String
+    }
+
+
+type Msg
+    = AddWish
+    | UpdateNewWishContent String
+    | RemoveWish Int
+    | SaveWishlist
+
+
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        Increment ->
-            model + 1
+        AddWish ->
+            let
+                newWish =
+                    { content = model.newWishContent, fulfilledBy = Nothing }
 
-        Decrement ->
-            model - 1
+                newModel =
+                    { model | wishes = model.wishes ++ [ newWish ], newWishContent = "" }
+            in
+            ( newModel, Cmd.none )
+
+        UpdateNewWishContent newContent ->
+            let
+                newModel =
+                    { model | newWishContent = newContent }
+            in
+            ( newModel, Cmd.none )
+
+        RemoveWish index ->
+            let
+                newModel =
+                    { model | wishes = removeAt index model.wishes }
+            in
+            ( newModel, Cmd.none )
+
+        SaveWishlist ->
+            -- Here you would save the wishlist to the database.
+            -- This is a placeholder implementation.
+            ( model, Cmd.none )
 
 
-view : Int -> Html Msg
+removeAt : Int -> List a -> List a
+removeAt index list =
+    List.take index list ++ List.drop (index + 1) list
+
+
+main : Program () Model Msg
+main =
+    Browser.element
+        { init = \() -> ( initialModel, Cmd.none )
+        , view = view
+        , update = update
+        , subscriptions = \_ -> Sub.none
+        }
+
+
+initialModel : Model
+initialModel =
+    { wishes = []
+    , newWishContent = ""
+    }
+
+
+view : Model -> Html Msg
 view model =
     div []
-        [ img [ src <| VitePluginHelper.asset "/src/assets/logo.png", style "width" "300px" ] []
-        , helloWorld model
+        [ div []
+            (List.indexedMap
+                (\index wish ->
+                    div []
+                        [ text wish.content
+                        , button [ onClick (RemoveWish index) ] [ text "Remove" ]
+                        ]
+                )
+                model.wishes
+            )
+        , input [ placeholder "New wish", onInput UpdateNewWishContent ] []
+        , button [ onClick AddWish ] [ text "Add Wish" ]
+        , button [ onClick SaveWishlist ] [ text "Save Wishlist" ]
         ]
