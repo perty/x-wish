@@ -61,4 +61,10 @@ I asked then to get the code for saving a wishlist, as it had planned. It did an
 a Http post request to the endpoint. It did not work and no error message. Copilot asked for console.log at certain points 
 in the code and after two iterations, the problem was solved.
 
+## Some problem with Elm
+
+A bit surprising is that Copilot has a problem with updating nested structures. It is a bit complicated in Elm and the
+intutive way is not right. Copilot does the human error, despite given example of how to do it correctly. I'd expect it
+to not do the human error.
+
 
