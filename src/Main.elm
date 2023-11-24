@@ -2,7 +2,7 @@ module Main exposing (Model, Msg(..), Wish, initialModel, main, removeAt, update
 
 import Browser
 import Html exposing (Html, button, div, input, text)
-import Html.Attributes exposing (placeholder)
+import Html.Attributes exposing (placeholder, value)
 import Html.Events exposing (onClick, onInput)
 
 
@@ -93,7 +93,7 @@ view model =
                 )
                 model.wishes
             )
-        , input [ placeholder "New wish", onInput UpdateNewWishContent ] []
+        , input [ placeholder "New wish", onInput UpdateNewWishContent, value model.newWishContent ] []
         , button [ onClick AddWish ] [ text "Add Wish" ]
         , button [ onClick SaveWishlist ] [ text "Save Wishlist" ]
         ]
