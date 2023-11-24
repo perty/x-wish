@@ -1,0 +1,16 @@
+POST http://localhost:3000/api/save-wishlist
+Content-Type: application/json
+
+{
+"owner": "test.user",
+"wishes": [
+    {
+        "content": "wish item 1b"
+    },
+    {
+        "content": "wish item 2"
+    }
+]
+}
+
+

@@ -57,4 +57,8 @@ I used an example from the documentation. Copilot understood and proposed a file
 I got a error code back 42601 which it understood and corrected its suggest code that then worked. I did not even need to
 restart the vercel server.
 
+I asked then to get the code for saving a wishlist, as it had planned. It did an attempt and asked me to test it by doing¨
+a Http post request to the endpoint. It did not work and no error message. Copilot asked for console.log at certain points 
+in the code and after two iterations, the problem was solved.
+
 
