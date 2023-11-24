@@ -1,6 +1,6 @@
 # Notes
 
-## Inital prompt
+## Initial prompt
 
 An application that allows users to create wishlists and share these with their friends. Friends should be able to book which wishes they will fulfill. The person who posted the list cannot see which wishes will be fulfilled. 
 
@@ -47,3 +47,14 @@ Implement the user authentication system.
 Create the interface for managing wishlists.
 Implement the wishlist sharing functionality.
 Implement the wish fulfillment functionality.
+
+## Connecting to database
+
+Here I get some suggestions but I don't think they are correct in case of Vercel. 
+
+I used an example from the documentation. Copilot understood and proposed a file for creating the tables in the database.
+
+I got a error code back 42601 which it understood and corrected its suggest code that then worked. I did not even need to
+restart the vercel server.
+
+
