@@ -1,0 +1,18 @@
+{
+    "result1": {
+        "command": "CREATE",
+        "fields": [],
+        "rowAsArray": false,
+        "rowCount": null,
+        "rows": [],
+        "viaNeonFetch": true
+    },
+    "result2": {
+        "command": "CREATE",
+        "fields": [],
+        "rowAsArray": false,
+        "rowCount": null,
+        "rows": [],
+        "viaNeonFetch": true
+    }
+}
