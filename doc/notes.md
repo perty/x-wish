@@ -67,4 +67,12 @@ A bit surprising is that Copilot has a problem with updating nested structures. 
 intutive way is not right. Copilot does the human error, despite given example of how to do it correctly. I'd expect it
 to not do the human error.
 
+## Authentication
+
+So we built an authorization solution instead of using an external provider. Quite a lot of work and things was probably 
+complicated due to not starting with type module in the package.json from start. A friend suggested using Google instead
+as it should be quite simple. But there is nothing in the documentation for Vercel that says it is possible. On the other
+hand, if it as simple as stated, no special support is needed.
+
+Question is, should I back out and try Google or be content with the current solution now that it works?
 
