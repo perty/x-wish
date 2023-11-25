@@ -15,6 +15,8 @@ type alias Model =
     , currentUser : Maybe String
     , username : String
     , password : String
+    , otherUser : String
+    , errorMessage : String
     }
 
 
@@ -35,6 +37,8 @@ initialModel =
     , currentUser = Nothing
     , username = ""
     , password = ""
+    , otherUser = ""
+    , errorMessage = ""
     }
 
 
@@ -49,6 +53,9 @@ type Msg
     | SubmitLogin
     | LoginResult (Result Http.Error String)
     | LoadWishlistResult (Result Http.Error Wishlist)
+    | UpdateOtherUser String
+    | ViewOtherUserList String
+    | LoadOtherUserWishlistResult (Result Http.Error String)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -70,14 +77,15 @@ update msg model =
         LoginResult result ->
             case result of
                 Ok token ->
-                    ( { model | currentUser = Just token,
-                     wishlist = { currentWishlist | owner = model.username } }, 
-                     loadWishlist (Just token) model.username )
+                    ( { model
+                        | currentUser = Just token
+                        , wishlist = { currentWishlist | owner = model.username }
+                      }
+                    , loadWishlist (Just token) model.username
+                    )
 
                 Err _ ->
                     ( model, Cmd.none )
-
-
 
         LoadWishlistResult result ->
             case result of
@@ -137,6 +145,34 @@ update msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
+        UpdateOtherUser username ->
+            ( { model | otherUser = username }, Cmd.none )
+
+        ViewOtherUserList username ->
+            ( model, loadOthersWishlist model.currentUser username )
+
+        LoadOtherUserWishlistResult result ->
+            case result of
+                Ok response ->
+                    case Decode.decodeString wishlistDecoder response of
+                        Ok wishlist ->
+                            ( { model | wishlist = wishlist }, Cmd.none )
+
+                        Err _ ->
+                            ( { model | errorMessage = "An error occurred while decoding the wishlist." }, Cmd.none )
+
+                Err error ->
+                    case error of
+                        Http.BadStatus statusCode ->
+                            if statusCode == 404 then
+                                ( { model | errorMessage = "The other user '" ++ model.otherUser ++ "' does not have a wishlist yet." }, Cmd.none )
+
+                            else
+                                ( { model | errorMessage = "The other user does not have a wishlist yet." }, Cmd.none )
+
+                        _ ->
+                            ( { model | errorMessage = "An error occurred while loading the other user's wishlist." }, Cmd.none )
+
 
 login : String -> String -> Cmd Msg
 login username password =
@@ -168,15 +204,40 @@ loadWishlist token username =
         , tracker = Nothing
         }
 
+
+loadOthersWishlist : Maybe String -> String -> Cmd Msg
+loadOthersWishlist token username =
+    let
+        headers =
+            case token of
+                Just t ->
+                    [ Http.header "Authorization" ("Bearer " ++ t) ]
+
+                Nothing ->
+                    []
+    in
+    Http.request
+        { method = "GET"
+        , url = "/api/wishlist/" ++ username
+        , headers = headers
+        , body = Http.emptyBody
+        , expect = Http.expectString LoadOtherUserWishlistResult
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 wishlistDecoder : Decode.Decoder Wishlist
 wishlistDecoder =
     Decode.map2 Wishlist
         (Decode.field "owner" Decode.string)
         (Decode.field "wishes" (Decode.list wishDecoder))
 
+
 wishDecoder : Decode.Decoder Wish
 wishDecoder =
     Decode.map Wish (Decode.field "content" Decode.string)
+
 
 removeAt : Int -> List a -> List a
 removeAt index list =
@@ -214,19 +275,42 @@ view model =
 
         Just _ ->
             div []
-                [ div []
-                    (List.indexedMap
-                        (\index wish ->
-                            div []
-                                [ text wish.content
-                                , button [ onClick (RemoveWish index) ] [ text "Remove" ]
-                                ]
-                        )
-                        model.wishlist.wishes
-                    )
-                , input [ placeholder "New wish", onInput UpdateNewWishContent, value model.newWishContent ] []
-                , button [ onClick AddWish ] [ text "Add Wish" ]
-                , button [ onClick SaveWishlist ] [ text "Save Wishlist" ]
+                [ if model.username == model.wishlist.owner then
+                    div []
+                        [ div []
+                            [ text "Your Wishlist" ]
+                        , div []
+                            (List.indexedMap
+                                (\index wish ->
+                                    div []
+                                        [ text wish.content
+                                        , button [ onClick (RemoveWish index) ] [ text "Remove" ]
+                                        ]
+                                )
+                                model.wishlist.wishes
+                            )
+                        , input [ placeholder "New wish", onInput UpdateNewWishContent, value model.newWishContent ] []
+                        , button [ onClick AddWish ] [ text "Add Wish" ]
+                        , button [ onClick SaveWishlist ] [ text "Save Wishlist" ]
+                        ]
+
+                  else
+                    div []
+                        [ div []
+                            [ text (model.otherUser ++ "'s Wishlist") ]
+                        , div []
+                            (List.indexedMap
+                                (\index wish ->
+                                    div []
+                                        [ text wish.content
+                                        ]
+                                )
+                                model.wishlist.wishes
+                            )
+                        ]
+                , input [ placeholder "Other username", value model.otherUser, onInput UpdateOtherUser ] []
+                , button [ onClick (ViewOtherUserList model.otherUser) ] [ text "View Other User's Wishlist" ]
+                , text model.errorMessage
                 ]
 
 
