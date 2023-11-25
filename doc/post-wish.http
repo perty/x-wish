@@ -12,5 +12,21 @@ Content-Type: application/json
     }
 ]
 }
+###
 
+POST http://localhost:3000/api/register
+Content-Type: application/json
 
+{
+  "username": "test-user",
+  "password": "test-password"
+}
+###
+
+POST http://localhost:3000/api/login
+Content-Type: application/json
+
+{
+  "username": "test-user",
+  "password": "test-password"
+}
