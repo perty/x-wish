@@ -1,6 +1,7 @@
 import { sql } from '@vercel/postgres';
+const withAuth = require('../../middlewares/withAuth');
 
-module.exports = async (request, response) => {
+module.exports = withAuth(async (request, response) => {
     const { username } = request.query;
 
     try {
@@ -25,4 +26,4 @@ module.exports = async (request, response) => {
         console.error(error);
         return response.status(500).json({ error });
     }
-};
+});

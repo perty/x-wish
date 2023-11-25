@@ -48,7 +48,6 @@ type Msg
     | UpdatePassword String
     | SubmitLogin
     | LoginResult (Result Http.Error String)
-    | LoadWishlist
     | LoadWishlistResult (Result Http.Error Wishlist)
 
 
@@ -71,13 +70,14 @@ update msg model =
         LoginResult result ->
             case result of
                 Ok token ->
-                    ( { model | currentUser = Just token, wishlist = { currentWishlist | owner = model.username } }, loadWishlist model.username )
+                    ( { model | currentUser = Just token,
+                     wishlist = { currentWishlist | owner = model.username } }, 
+                     loadWishlist (Just token) model.username )
 
                 Err _ ->
                     ( model, Cmd.none )
 
-        LoadWishlist ->
-            ( model, loadWishlist model.username )
+
 
         LoadWishlistResult result ->
             case result of
@@ -147,12 +147,27 @@ login username password =
         }
 
 
-loadWishlist : String -> Cmd Msg
-loadWishlist username =
-    Http.get
-        { url = "/api/wishlist/" ++ username
+loadWishlist : Maybe String -> String -> Cmd Msg
+loadWishlist token username =
+    let
+        headers =
+            case token of
+                Just t ->
+                    [ Http.header "Authorization" ("Bearer " ++ t) ]
+
+                Nothing ->
+                    []
+    in
+    Http.request
+        { method = "GET"
+        , url = "/api/wishlist/" ++ username
+        , headers = headers
+        , body = Http.emptyBody
         , expect = Http.expectJson LoadWishlistResult wishlistDecoder
+        , timeout = Nothing
+        , tracker = Nothing
         }
+
 wishlistDecoder : Decode.Decoder Wishlist
 wishlistDecoder =
     Decode.map2 Wishlist

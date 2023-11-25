@@ -34,3 +34,5 @@ Content-Type: application/json
 ###
 GET http://localhost:3000/api/wishlist/test-user
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwidXNlcm5hbWUiOiJ0ZXN0LXVzZXIiLCJpYXQiOjE3MDA5MDc4Nzl9.p696R83QsYqNyj8r2LKRRizSO2LavUkygLWIEdnHAyM
+```
