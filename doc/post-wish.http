@@ -30,3 +30,7 @@ Content-Type: application/json
   "username": "test-user",
   "password": "test-password"
 }
+
+###
+GET http://localhost:3000/api/wishlist/test-user
+Content-Type: application/json
