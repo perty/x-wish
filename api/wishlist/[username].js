@@ -1,7 +1,7 @@
 import { sql } from '@vercel/postgres';
-const withAuth = require('../../middlewares/withAuth');
+import withAuth from '../../middlewares/withAuth.js';
 
-module.exports = withAuth(async (request, response) => {
+export default withAuth(async (request, response) => {
     const { username } = request.query;
 
     try {

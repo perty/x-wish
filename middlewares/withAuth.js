@@ -1,7 +1,7 @@
-const { send } = require('micro');
-const jwt = require('jsonwebtoken');
+import { send } from 'micro';
+import jwt from 'jsonwebtoken';
 
-module.exports = fn => async (req, res) => {
+export default fn => async (req, res) => {
     const authHeader = req.headers.authorization;
     console.log(authHeader);
     if (authHeader) {
