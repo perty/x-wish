@@ -1,4 +1,4 @@
-module Main exposing (Model, Msg(..), Wish, initialModel, main, removeAt, update, view)
+module Main exposing (Model, Msg(..), Wish, Wishlist, main)
 
 import Browser
 import Html exposing (Html, button, div, input, text)
@@ -61,6 +61,7 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     let
+        currentWishlist : Wishlist
         currentWishlist =
             model.wishlist
     in
@@ -97,36 +98,30 @@ update msg model =
 
         AddWish ->
             let
+                newWish : { content : String }
                 newWish =
                     { content = model.newWishContent }
 
+                newWishlist : Wishlist
                 newWishlist =
                     { currentWishlist | wishes = model.wishlist.wishes ++ [ newWish ] }
 
+                newModel : Model
                 newModel =
                     { model | wishlist = newWishlist, newWishContent = "" }
             in
             ( newModel, Cmd.none )
 
         UpdateNewWishContent newContent ->
-            let
-                newModel =
-                    { model | newWishContent = newContent }
-            in
-            ( newModel, Cmd.none )
+            ( { model | newWishContent = newContent }, Cmd.none )
 
         RemoveWish index ->
             let
+                newWishes : List Wish
                 newWishes =
                     removeAt index currentWishlist.wishes
-
-                newWishlist =
-                    { currentWishlist | wishes = newWishes }
-
-                newModel =
-                    { model | wishlist = newWishlist }
             in
-            ( newModel, Cmd.none )
+            ( { model | wishlist = { currentWishlist | wishes = newWishes } }, Cmd.none )
 
         SaveWishlist ->
             ( model
@@ -143,7 +138,7 @@ update msg model =
                     ( model, Cmd.none )
 
                 Err _ ->
-                    ( model, Cmd.none )
+                    ( { model | errorMessage = "Save failed " }, Cmd.none )
 
         UpdateOtherUser username ->
             ( { model | otherUser = username }, Cmd.none )
@@ -185,19 +180,10 @@ login username password =
 
 loadWishlist : Maybe String -> String -> Cmd Msg
 loadWishlist token username =
-    let
-        headers =
-            case token of
-                Just t ->
-                    [ Http.header "Authorization" ("Bearer " ++ t) ]
-
-                Nothing ->
-                    []
-    in
     Http.request
         { method = "GET"
         , url = "/api/wishlist/" ++ username
-        , headers = headers
+        , headers = authHeader token
         , body = Http.emptyBody
         , expect = Http.expectJson LoadWishlistResult wishlistDecoder
         , timeout = Nothing
@@ -207,24 +193,25 @@ loadWishlist token username =
 
 loadOthersWishlist : Maybe String -> String -> Cmd Msg
 loadOthersWishlist token username =
-    let
-        headers =
-            case token of
-                Just t ->
-                    [ Http.header "Authorization" ("Bearer " ++ t) ]
-
-                Nothing ->
-                    []
-    in
     Http.request
         { method = "GET"
         , url = "/api/wishlist/" ++ username
-        , headers = headers
+        , headers = authHeader token
         , body = Http.emptyBody
         , expect = Http.expectString LoadOtherUserWishlistResult
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+authHeader : Maybe String -> List Http.Header
+authHeader token =
+    case token of
+        Just t ->
+            [ Http.header "Authorization" ("Bearer " ++ t) ]
+
+        Nothing ->
+            []
 
 
 wishlistDecoder : Decode.Decoder Wishlist
@@ -299,8 +286,8 @@ view model =
                         [ div []
                             [ text (model.otherUser ++ "'s Wishlist") ]
                         , div []
-                            (List.indexedMap
-                                (\_ wish ->
+                            (List.map
+                                (\wish ->
                                     div []
                                         [ text wish.content
                                         ]
