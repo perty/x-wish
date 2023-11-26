@@ -1,40 +1,44 @@
-# Vite Elm Template
+# X-wish
 
 [![ci](https://github.com/lindsaykwardell/vite-elm-template/actions/workflows/ci.yml/badge.svg)](https://github.com/lindsaykwardell/vite-elm-template/actions/workflows/ci.yml)
-[![Gitpod ready-to-code](https://img.shields.io/badge/Gitpod-ready--to--code-908a85?logo=gitpod)](https://gitpod.io/#https://github.com/lindsaykwardell/vite-elm-template)
 
-A default template for building Elm applications using Vite. Includes hot-module reload of Elm modules (courtesy of `vite-plugin-elm`).
+An application built by GitHub Copliot.
 
-> Vite (French word for "fast", pronounced /vit/) is a build tool that aims to provide a faster and leaner development experience for modern web projects.
+##  Chapter 1
 
-> Elm is a functional language that compiles to JavaScript. It helps you make websites and web apps. It has a strong emphasis on simplicity and quality tooling.
+### Post on LinkedIn
 
-Live demo site: https://vite-elm-template.netlify.app/
+This is a post I wrote on [LinkedIn](https://www.linkedin.com/feed/update/urn:li:activity:7134449617051561985?utm_source=share&utm_medium=member_desktop).
 
-## Features
+I have spent two days on a project where I let myself depend heavily on GitHub Copilot. 
 
-- [Hot Module Reload](https://github.com/hmsk/vite-plugin-elm) of all code in the app (including Elm)
-- [Integration with Vite static asset handling](https://package.elm-lang.org/packages/hmsk/elm-vite-plugin-helper/latest/)
-- Tooling installation via [elm-tooling](https://elm-tooling.github.io/elm-tooling-cli/)
-  - Includes Elm, elm-format, elm-json, and elm-test-rs
-- Basic unit test and [elm-review](https://package.elm-lang.org/packages/jfmengels/elm-review/latest/) examples
-- Github Actions CI for running tests
-- Recommends the [Elm VS Code extension](https://marketplace.visualstudio.com/items?itemName=Elmtooling.elm-ls-vscode)
+I have one such project under the belt already. A small test where I (we) made a Markdown editor and deployed it to Vercel. I had never used Vercel earlier.
 
-For a single page app (SPA) version of this template, check out [`vite-elm-spa`](https://github.com/lindsaykwardell/vite-elm-spa)
+Here is the result including the initial prompt: [perty/elm-vite-test](https://github.com/perty/elm-vite-test).
 
-## Get Started
+This time, I wanted to make something more involved with a database and multi user with sharing between users. 
 
-```bash
-# Clone the template locally, removing the template's Git log
-npx tiged lindsaykwardell/vite-elm-template my-elm-app
+My focus has been on prompting and not writing the code. I was curious about where prompting focus would take the project. 
 
-# Enter the project, install dependencies, and get started!
-cd my-elm-app
-npm install
-npm run dev
-```
+The impression was that AI acted a bit like a buddy that I pair program with and who knows more than I do about some of the tech stack. 
 
-For more information about Vite, check out [Vite's official documentation.](https://vitejs.dev/)
+But of course there are some differences. 
 
-To learn more about Elm, check out [Elm's official homepage](https://elm-lang.org/).
+One observation is the rabbit hole syndrome. AI has endless patience, unlike a human. So if, or rather when, my reasoning goes down a rabbit hole, it just tags along and try to help me. A human would get impatient and say "let's try something different ".
+
+I was impressed by its structured reasoning when we had an issue with the database calls. First, it asked me to insert a print statement when I presented the problem "server error". That gave some information and it asked for another print at another place, which gave enough information to solve it and suggest a change. 
+
+This iterative process to solving mimics human behaviour very well.
+
+I got the itch several times to write the code myself, which is much like saying "give me the keyboard " when pair programming. But I resisted that and I think it was beneficial to the project. 😃
+
+One thing the AI does, unlike most human pair programmers, is planning. I come up with an idea and it goes "great, then we need to do these things " and gives a list of things. 
+
+The project is far from finished so I hopefully will have more to share later on.
+
+### State
+
+It is a hideous application. Functionally wise, it has user authentication, a wish list and wishes. A user can look at other
+user's wishlists if they know their username.
+
+Authentication is done with a username and a password. No support for restoring a forgotten password. In fact there is no support for signing up. I have to create users through the REST API.
