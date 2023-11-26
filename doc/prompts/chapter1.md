@@ -2856,3 +2856,14 @@ Next steps:
 - Correct your code as shown above.
 - Test the feature to make sure it works as expected.
 - If you encounter any issues, don't hesitate to ask for help.
+
+## Epilogue 
+
+I ended up fixing the issues myself. I did not use the code from Copilot as it didn't compile. Also, I cleaned up the code and fixed
+issues that was raised by elm-review.
+
+In summary, I got a lot of help from Copilot, both in terms of
+typing code and solving problems. I still need to know the ins 
+and outs of programming. But Copilot is a great help. It is
+trying to fill in the words for me here where it complements 
+itself as great tool. LOL.
