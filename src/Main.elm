@@ -12,7 +12,7 @@ import Json.Encode as Encode
 type alias Model =
     { wishlist : Wishlist
     , newWishContent : String
-    , currentUser : Maybe String
+    , token : Maybe String
     , username : String
     , password : String
     , otherUser : String
@@ -34,7 +34,7 @@ initialModel : Model
 initialModel =
     { wishlist = { owner = "default", wishes = [] }
     , newWishContent = ""
-    , currentUser = Nothing
+    , token = Nothing
     , username = ""
     , password = ""
     , otherUser = ""
@@ -78,7 +78,7 @@ update msg model =
             case result of
                 Ok token ->
                     ( { model
-                        | currentUser = Just token
+                        | token = Just token
                         , wishlist = { currentWishlist | owner = model.username }
                       }
                     , loadWishlist (Just token) model.username
@@ -149,7 +149,7 @@ update msg model =
             ( { model | otherUser = username }, Cmd.none )
 
         ViewOtherUserList username ->
-            ( model, loadOthersWishlist model.currentUser username )
+            ( model, loadOthersWishlist model.token username )
 
         LoadOtherUserWishlistResult result ->
             case result of
@@ -265,7 +265,7 @@ tokenDecoder =
 
 view : Model -> Html Msg
 view model =
-    case model.currentUser of
+    case model.token of
         Nothing ->
             div []
                 [ input [ placeholder "Username", onInput UpdateUsername, value model.username ] []
@@ -300,7 +300,7 @@ view model =
                             [ text (model.otherUser ++ "'s Wishlist") ]
                         , div []
                             (List.indexedMap
-                                (\index wish ->
+                                (\_ wish ->
                                     div []
                                         [ text wish.content
                                         ]
