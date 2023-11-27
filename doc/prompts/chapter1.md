@@ -2866,4 +2866,4 @@ In summary, I got a lot of help from Copilot, both in terms of
 typing code and solving problems. I still need to know the ins 
 and outs of programming. But Copilot is a great help. It is
 trying to fill in the words for me here where it complements 
-itself as great tool. LOL.
+itself as a great tool. LOL.
