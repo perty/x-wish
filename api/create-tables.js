@@ -12,6 +12,7 @@ export default async function handler(request, response) {
       CREATE TABLE wishes (
         id SERIAL PRIMARY KEY,
         content VARCHAR(255),
+        fulfilled_by VARCHAR(255),
         wishlist_id INTEGER REFERENCES wishlists(id)
       );
     `;

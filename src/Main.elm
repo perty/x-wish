@@ -5,7 +5,7 @@ import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode as Decode
+import Json.Decode as Decode exposing (Decoder, field, int, list, map3, nullable, string)
 import Json.Encode as Encode
 
 
@@ -27,7 +27,10 @@ type alias Wishlist =
 
 
 type alias Wish =
-    { content : String }
+    { id : Int
+    , content : String
+    , fulfilledBy : Maybe String
+    }
 
 
 initialModel : Model
@@ -56,6 +59,8 @@ type Msg
     | UpdateOtherUser String
     | ViewOtherUserList String
     | LoadOtherUserWishlistResult (Result Http.Error String)
+    | FulfillWish Int
+    | FulfillWishResponse Int (Result Http.Error ())
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -93,14 +98,23 @@ update msg model =
                 Ok wishlist ->
                     ( { model | wishlist = wishlist }, Cmd.none )
 
-                Err _ ->
-                    ( model, Cmd.none )
+                Err error ->
+                    case error of
+                        Http.BadStatus statusCode ->
+                            if statusCode == 404 then
+                                ( { model | wishlist = { owner = model.username, wishes = [] } }, Cmd.none )
+
+                            else
+                                ( { model | errorMessage = "Somethinge went wrong." }, Cmd.none )
+
+                        _ ->
+                            ( { model | errorMessage = "An error occurred while loading the other user's wishlist." }, Cmd.none )
 
         AddWish ->
             let
-                newWish : { content : String }
+                newWish : Wish
                 newWish =
-                    { content = model.newWishContent }
+                    { id = 0, content = model.newWishContent, fulfilledBy = Nothing }
 
                 newWishlist : Wishlist
                 newWishlist =
@@ -168,6 +182,46 @@ update msg model =
                         _ ->
                             ( { model | errorMessage = "An error occurred while loading the other user's wishlist." }, Cmd.none )
 
+        FulfillWish wishId ->
+            let
+                newWishlist : List Wish
+                newWishlist =
+                    List.map
+                        (\wish ->
+                            if wish.id == wishId then
+                                if wish.fulfilledBy == Just model.username then
+                                    { wish | fulfilledBy = Nothing }
+
+                                else
+                                    { wish | fulfilledBy = Just model.username }
+
+                            else
+                                wish
+                        )
+                        model.wishlist.wishes
+
+                findWish : Wish
+                findWish =
+                    List.filter
+                        (\wish ->
+                            wish.id == wishId
+                        )
+                        newWishlist
+                        |> List.head
+                        |> Maybe.withDefault { id = 0, content = "", fulfilledBy = Nothing }
+            in
+            ( { model | wishlist = { currentWishlist | wishes = newWishlist } }
+            , savefulfillWish model.token findWish
+            )
+
+        FulfillWishResponse _ result ->
+            case result of
+                Ok _ ->
+                    ( model, Cmd.none )
+
+                Err _ ->
+                    ( { model | errorMessage = "Failed to fulfill wish." }, Cmd.none )
+
 
 login : String -> String -> Cmd Msg
 login username password =
@@ -204,6 +258,19 @@ loadOthersWishlist token username =
         }
 
 
+savefulfillWish : Maybe String -> Wish -> Cmd Msg
+savefulfillWish token wish =
+    Http.request
+        { method = "POST"
+        , url = "/api/wishes/" ++ String.fromInt wish.id
+        , body = Http.jsonBody (encodeWish wish)
+        , expect = Http.expectWhatever (FulfillWishResponse wish.id)
+        , headers = authHeader token
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 authHeader : Maybe String -> List Http.Header
 authHeader token =
     case token of
@@ -221,9 +288,12 @@ wishlistDecoder =
         (Decode.field "wishes" (Decode.list wishDecoder))
 
 
-wishDecoder : Decode.Decoder Wish
+wishDecoder : Decoder Wish
 wishDecoder =
-    Decode.map Wish (Decode.field "content" Decode.string)
+    map3 Wish
+        (field "id" int)
+        (field "content" string)
+        (field "fulfilledBy" (nullable string))
 
 
 removeAt : Int -> List a -> List a
@@ -234,8 +304,9 @@ removeAt index list =
 encodeWish : Wish -> Encode.Value
 encodeWish wish =
     Encode.object
-        [ ( "content", Encode.string wish.content ) ]
-
+        [ ( "content", Encode.string wish.content )
+        , ( "fulfilledBy", Maybe.withDefault Encode.null (Maybe.map Encode.string wish.fulfilledBy) )
+        ]
 
 encodeWishlist : Wishlist -> Encode.Value
 encodeWishlist wishlist =
@@ -285,20 +356,35 @@ view model =
                     div []
                         [ div []
                             [ text (model.otherUser ++ "'s Wishlist") ]
-                        , div []
-                            (List.map
-                                (\wish ->
-                                    div []
-                                        [ text wish.content
-                                        ]
-                                )
-                                model.wishlist.wishes
-                            )
+                        , viewWishlist model.wishlist model.username
                         ]
                 , input [ placeholder "Other username", value model.otherUser, onInput UpdateOtherUser ] []
                 , button [ onClick (ViewOtherUserList model.otherUser) ] [ text "View Other User's Wishlist" ]
                 , text model.errorMessage
                 ]
+
+
+viewWishlist : Wishlist -> String -> Html Msg
+viewWishlist wishlist username =
+    div []
+        (List.map
+            (\wish ->
+                let
+                    buttonText =
+                        if wish.fulfilledBy == Just username then
+                            "Fulfilled"
+
+                        else
+                            "Fulfill"
+                in
+                div []
+                    [ text wish.content
+                    , button [ onClick (FulfillWish wish.id) ] [ text buttonText ]
+                    , div [] [ text <| Maybe.withDefault "" wish.fulfilledBy ]
+                    ]
+            )
+            wishlist.wishes
+        )
 
 
 main : Program () Model Msg

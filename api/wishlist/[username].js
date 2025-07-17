@@ -6,7 +6,7 @@ export default withAuth(async (request, response) => {
 
     try {
         const wishlistResult = await sql`
-            SELECT w.id, w.content
+            SELECT w.id, w.content, w.fulfilled_by
             FROM wishlists wl
             JOIN wishes w ON wl.id = w.wishlist_id
             WHERE wl.owner = ${username}
@@ -17,7 +17,11 @@ export default withAuth(async (request, response) => {
         } else {
             const wishlist = {
                 owner: username,
-                wishes: wishlistResult.rows.map(row => ({ content: row.content }))
+                wishes: wishlistResult.rows.map(row => ({
+                    id: row.id,
+                    content: row.content,
+                    fulfilledBy: row.fulfilled_by
+                }))
             };
 
             return response.status(200).json(wishlist);
