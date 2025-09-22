@@ -5,7 +5,7 @@ import Html exposing (Html, button, div, input, text)
 import Html.Attributes exposing (placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode as Decode exposing (Decoder, field, int, list, map3, nullable, string)
+import Json.Decode as Decode exposing (Decoder, field, int, map3, nullable, string)
 import Json.Encode as Encode
 
 
@@ -214,13 +214,13 @@ update msg model =
             , savefulfillWish model.token findWish
             )
 
-        FulfillWishResponse _ result ->
+        FulfillWishResponse wishId result ->
             case result of
                 Ok _ ->
                     ( model, Cmd.none )
 
                 Err _ ->
-                    ( { model | errorMessage = "Failed to fulfill wish." }, Cmd.none )
+                    ( { model | errorMessage = "Failed to fulfill wish: " ++ String.fromInt wishId }, Cmd.none )
 
 
 login : String -> String -> Cmd Msg
@@ -308,6 +308,7 @@ encodeWish wish =
         , ( "fulfilledBy", Maybe.withDefault Encode.null (Maybe.map Encode.string wish.fulfilledBy) )
         ]
 
+
 encodeWishlist : Wishlist -> Encode.Value
 encodeWishlist wishlist =
     Encode.object
@@ -370,6 +371,7 @@ viewWishlist wishlist username =
         (List.map
             (\wish ->
                 let
+                    buttonText : String
                     buttonText =
                         if wish.fulfilledBy == Just username then
                             "Fulfilled"
