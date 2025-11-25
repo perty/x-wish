@@ -21,7 +21,7 @@
     "vite-plugin-elm": "^2.9.0"
   },
   "dependencies": {
-    "@vercel/postgres": "^0.5.1",
+    "@vercel/postgres": "^0.10.0",
     "bcrypt": "^5.1.1",
     "elm-debug-transformer": "^1.2.1",
     "express": "^5.1.0",
